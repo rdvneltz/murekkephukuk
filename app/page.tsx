@@ -27,6 +27,8 @@ interface TeamMember {
   title: string
   bio: string
   image: string
+  email?: string
+  phone?: string
 }
 
 export default function Home() {
