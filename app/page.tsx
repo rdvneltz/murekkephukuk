@@ -54,19 +54,27 @@ export default function Home() {
 
   useEffect(() => {
     // Hero verilerini çek
-    axios.get('/api/hero').then(({ data }) => {
+    axios.get('/api/hero', {
+      headers: { 'Cache-Control': 'no-cache' }
+    }).then(({ data }) => {
       if (data) setHero(data)
-    }).catch(() => {})
+    }).catch((err) => console.error('Hero error:', err))
 
     // Hizmetleri çek
-    axios.get('/api/services').then(({ data }) => {
+    axios.get('/api/services', {
+      headers: { 'Cache-Control': 'no-cache' }
+    }).then(({ data }) => {
+      console.log('Services data:', data)
       if (data && data.length > 0) setServices(data)
-    }).catch(() => {})
+    }).catch((err) => console.error('Services error:', err))
 
     // Ekip üyelerini çek
-    axios.get('/api/team').then(({ data }) => {
+    axios.get('/api/team', {
+      headers: { 'Cache-Control': 'no-cache' }
+    }).then(({ data }) => {
+      console.log('Team data:', data)
       if (data && data.length > 0) setTeam(data)
-    }).catch(() => {})
+    }).catch((err) => console.error('Team error:', err))
   }, [])
 
   const getIcon = (iconName: string) => {
@@ -85,8 +93,21 @@ export default function Home() {
     <div ref={containerRef} className="min-h-screen bg-navy-900">
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900">
-          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+        {/* Video Background */}
+        <div className="absolute inset-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute w-full h-full object-cover"
+          >
+            <source src="https://cdn.coverr.co/videos/coverr-istanbul-bosphorus-aerial-view-8205/1080p.mp4" type="video/mp4" />
+          </video>
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-navy-900/80 via-navy-900/70 to-navy-900/90"></div>
+          {/* Animated particles effect */}
+          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-20 [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
         </div>
 
         <motion.div
@@ -94,27 +115,44 @@ export default function Home() {
           className="relative z-10 text-center px-4 max-w-6xl mx-auto"
         >
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.2, type: "spring", stiffness: 100 }}
             className="mb-12"
           >
-            <Image
-              src="/assets/murekkep-logo-saydam.png"
-              alt="Mürekkep Hukuk"
-              width={200}
-              height={200}
-              className="mx-auto drop-shadow-2xl"
-            />
+            <motion.div
+              animate={{
+                scale: [1, 1.05, 1],
+                filter: ["drop-shadow(0 0 20px rgba(193, 154, 107, 0.5))", "drop-shadow(0 0 40px rgba(193, 154, 107, 0.8))", "drop-shadow(0 0 20px rgba(193, 154, 107, 0.5))"]
+              }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Image
+                src="/assets/murekkep-logo-saydam.png"
+                alt="Mürekkep Hukuk"
+                width={200}
+                height={200}
+                className="mx-auto"
+              />
+            </motion.div>
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
-            className="text-6xl md:text-8xl font-bold mb-6 gradient-text"
+            className="text-6xl md:text-8xl font-bold mb-6"
           >
-            {hero.title}
+            <motion.span
+              className="bg-gradient-to-r from-gold-300 via-gold-500 to-gold-300 bg-clip-text text-transparent"
+              animate={{
+                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+              }}
+              transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+              style={{ backgroundSize: "200% auto" }}
+            >
+              {hero.title}
+            </motion.span>
           </motion.h1>
 
           <motion.p
@@ -140,12 +178,26 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 1 }}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{
+              scale: 1.1,
+              boxShadow: "0 0 40px rgba(193, 154, 107, 0.8)",
+            }}
             whileTap={{ scale: 0.95 }}
-            className="bg-gradient-to-r from-gold-600 to-gold-500 text-white px-10 py-4 rounded-full font-semibold text-lg hover:from-gold-700 hover:to-gold-600 transition-all shadow-2xl inline-flex items-center gap-2"
+            className="relative bg-gradient-to-r from-gold-600 to-gold-500 text-white px-10 py-4 rounded-full font-semibold text-lg transition-all shadow-2xl inline-flex items-center gap-2 overflow-hidden group"
           >
-            {hero.buttonText}
-            <ChevronRight className="w-5 h-5" />
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+              animate={{
+                x: ["-100%", "100%"],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            />
+            <span className="relative z-10">{hero.buttonText}</span>
+            <ChevronRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
           </motion.a>
         </motion.div>
 
@@ -180,18 +232,27 @@ export default function Home() {
             {services.length > 0 ? services.map((service, index) => (
               <motion.div
                 key={service.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -10 }}
-                className="glass rounded-2xl p-8 hover:bg-white/20 transition-all group"
+                transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}
+                whileHover={{
+                  y: -15,
+                  scale: 1.05,
+                  boxShadow: "0 20px 60px rgba(193, 154, 107, 0.3)",
+                  borderColor: "rgba(193, 154, 107, 0.5)",
+                }}
+                className="glass rounded-2xl p-8 transition-all group cursor-pointer border-2 border-transparent"
               >
-                <div className="text-gold-500 mb-6 transform group-hover:scale-110 transition-transform">
+                <motion.div
+                  className="text-gold-500 mb-6"
+                  whileHover={{ rotate: 360, scale: 1.2 }}
+                  transition={{ duration: 0.6 }}
+                >
                   {getIcon(service.icon)}
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-4">{service.title}</h3>
-                <p className="text-white/70 leading-relaxed">{service.description}</p>
+                </motion.div>
+                <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-gold-400 transition-colors">{service.title}</h3>
+                <p className="text-white/70 leading-relaxed group-hover:text-white/90 transition-colors">{service.description}</p>
               </motion.div>
             )) : (
               <div className="col-span-3 text-center text-white/70">
