@@ -31,6 +31,15 @@ interface TeamMember {
   phone?: string
 }
 
+interface ContactInfo {
+  id: string
+  address: string
+  phone: string
+  email: string
+  workingHours: string
+  mapUrl?: string
+}
+
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
@@ -51,6 +60,13 @@ export default function Home() {
 
   const [services, setServices] = useState<Service[]>([])
   const [team, setTeam] = useState<TeamMember[]>([])
+  const [contact, setContact] = useState<ContactInfo>({
+    id: '',
+    address: 'İstanbul, Türkiye',
+    phone: '+90 212 XXX XX XX',
+    email: 'info@murekkephukuk.com',
+    workingHours: 'Pazartesi - Cuma: 09:00 - 18:00'
+  })
 
   useEffect(() => {
     // Hero verilerini çek
@@ -75,6 +91,14 @@ export default function Home() {
       console.log('Team data:', data)
       if (data && data.length > 0) setTeam(data)
     }).catch((err) => console.error('Team error:', err))
+
+    // İletişim bilgilerini çek
+    axios.get('/api/contact', {
+      headers: { 'Cache-Control': 'no-cache' }
+    }).then(({ data }) => {
+      console.log('Contact data:', data)
+      if (data) setContact(data)
+    }).catch((err) => console.error('Contact error:', err))
   }, [])
 
   const getIcon = (iconName: string) => {
@@ -93,21 +117,38 @@ export default function Home() {
     <div ref={containerRef} className="min-h-screen bg-navy-900">
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Video Background */}
-        <div className="absolute inset-0">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute w-full h-full object-cover"
-          >
-            <source src="https://cdn.coverr.co/videos/coverr-istanbul-bosphorus-aerial-view-8205/1080p.mp4" type="video/mp4" />
-          </video>
+        {/* Animated Background */}
+        <div className="absolute inset-0 animated-gradient">
+          {/* Overlay circles */}
+          <div className="absolute top-0 left-0 w-96 h-96 bg-gold-600/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-navy-600/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gold-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+
           {/* Dark overlay for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-navy-900/80 via-navy-900/70 to-navy-900/90"></div>
-          {/* Animated particles effect */}
-          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-20 [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-navy-900/60 via-navy-800/70 to-navy-900/80"></div>
+
+          {/* Animated grid pattern */}
+          <div className="absolute inset-0 opacity-20">
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 bg-gold-400 rounded-full"
+                style={{
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                }}
+                animate={{
+                  opacity: [0.2, 0.8, 0.2],
+                  scale: [1, 1.5, 1],
+                }}
+                transition={{
+                  duration: 3 + Math.random() * 2,
+                  repeat: Infinity,
+                  delay: Math.random() * 2,
+                }}
+              />
+            ))}
+          </div>
         </div>
 
         <motion.div
@@ -387,7 +428,7 @@ export default function Home() {
             >
               <Phone className="w-12 h-12 text-gold-500 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">Telefon</h3>
-              <p className="text-white/70">+90 212 XXX XX XX</p>
+              <p className="text-white/70">{contact.phone}</p>
             </motion.div>
 
             <motion.div
@@ -399,7 +440,7 @@ export default function Home() {
             >
               <Mail className="w-12 h-12 text-gold-500 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">E-posta</h3>
-              <p className="text-white/70">info@murekkephukuk.com</p>
+              <p className="text-white/70">{contact.email}</p>
             </motion.div>
 
             <motion.div
@@ -411,7 +452,8 @@ export default function Home() {
             >
               <MapPin className="w-12 h-12 text-gold-500 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">Adres</h3>
-              <p className="text-white/70">İstanbul, Türkiye</p>
+              <p className="text-white/70">{contact.address}</p>
+              <p className="text-white/60 text-sm mt-2">{contact.workingHours}</p>
             </motion.div>
           </div>
 
