@@ -122,3 +122,37 @@ model SiteSettings {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model Appointment {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  phone           String
+  email           String?
+  date            DateTime
+  time            String
+  meetingPlatform String   // whatsapp, telegram, zoom, site
+  status          String   @default("pending") // pending, approved, cancelled, completed
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AvailableSlot {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  date        DateTime
+  startTime   String
+  endTime     String
+  isBooked    Boolean  @default(false)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model HeroVideo {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  fileName    String
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
