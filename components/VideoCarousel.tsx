@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { motion } from 'framer-motion'
 
 interface VideoCarouselProps {
   videoCount: number
@@ -12,84 +12,125 @@ interface VideoCarouselProps {
 export default function VideoCarousel({
   videoCount = 21,
   videoPath = '/videos/optimized',
-  fadeDuration = 1000
+  fadeDuration = 1200
 }: VideoCarouselProps) {
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  const videoRef1 = useRef<HTMLVideoElement>(null)
-  const videoRef2 = useRef<HTMLVideoElement>(null)
-  const [activeVideoRef, setActiveVideoRef] = useState<1 | 2>(1)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [nextIndex, setNextIndex] = useState(1)
+  const [showingFirst, setShowingFirst] = useState(true)
 
-  // Video listesi
-  const videoFiles = Array.from({ length: videoCount }, (_, i) => `${videoPath}/${i + 1}.mp4`)
+  const video1Ref = useRef<HTMLVideoElement>(null)
+  const video2Ref = useRef<HTMLVideoElement>(null)
+  const isTransitioningRef = useRef(false)
 
+  // Video path generator
+  const getVideoPath = useCallback((index: number) => {
+    return `${videoPath}/${index + 1}.mp4`
+  }, [videoPath])
+
+  // Initialize videos
   useEffect(() => {
-    const activeRef = activeVideoRef === 1 ? videoRef1.current : videoRef2.current
-    const inactiveRef = activeVideoRef === 1 ? videoRef2.current : videoRef1.current
+    if (video1Ref.current && video2Ref.current) {
+      // Set initial videos
+      video1Ref.current.src = getVideoPath(0)
+      video2Ref.current.src = getVideoPath(1)
 
-    if (activeRef && inactiveRef) {
-      // Video bittiğinde sonraki videoya geç
-      const handleVideoEnd = () => {
-        const nextIndex = (currentVideoIndex + 1) % videoCount
+      // Start first video
+      video1Ref.current.load()
+      video1Ref.current.play().catch(err => console.error('Video play error:', err))
 
-        // İnaktif video elementini hazırla
-        inactiveRef.src = videoFiles[nextIndex]
-        inactiveRef.load()
-
-        // Video yüklendiğinde play et
-        inactiveRef.addEventListener('loadeddata', () => {
-          inactiveRef.play()
-        }, { once: true })
-
-        setIsTransitioning(true)
-
-        setTimeout(() => {
-          setCurrentVideoIndex(nextIndex)
-          setActiveVideoRef(activeVideoRef === 1 ? 2 : 1)
-          setIsTransitioning(false)
-        }, fadeDuration / 2)
-      }
-
-      activeRef.addEventListener('ended', handleVideoEnd)
-
-      return () => {
-        activeRef.removeEventListener('ended', handleVideoEnd)
-      }
+      // Preload second video
+      video2Ref.current.load()
     }
-  }, [currentVideoIndex, activeVideoRef, videoCount, fadeDuration, videoFiles])
+  }, [getVideoPath])
+
+  // Add event listeners
+  useEffect(() => {
+    const video1 = video1Ref.current
+    const video2 = video2Ref.current
+
+    if (!video1 || !video2) return
+
+    const handleVideoEnded = (isFirstVideo: boolean) => {
+      // Only handle if this is the currently showing video
+      if (isFirstVideo !== showingFirst) return
+      if (isTransitioningRef.current) return
+
+      isTransitioningRef.current = true
+
+      const activeVideo = isFirstVideo ? video1 : video2
+      const nextVideo = isFirstVideo ? video2 : video1
+
+      // Calculate next indices
+      const newCurrentIndex = (currentIndex + 1) % videoCount
+      const newNextIndex = (currentIndex + 2) % videoCount
+
+      // Start fade transition and play next video
+      setShowingFirst(!isFirstVideo)
+
+      // Play the next video
+      const playPromise = nextVideo.play()
+      if (playPromise !== undefined) {
+        playPromise.catch(err => console.error('Video play error:', err))
+      }
+
+      // After fade completes, prepare the hidden video for next transition
+      setTimeout(() => {
+        setCurrentIndex(newCurrentIndex)
+        setNextIndex(newNextIndex)
+
+        activeVideo.src = getVideoPath(newNextIndex)
+        activeVideo.load()
+
+        isTransitioningRef.current = false
+      }, fadeDuration)
+    }
+
+    const handleVideo1End = () => handleVideoEnded(true)
+    const handleVideo2End = () => handleVideoEnded(false)
+
+    video1.addEventListener('ended', handleVideo1End)
+    video2.addEventListener('ended', handleVideo2End)
+
+    return () => {
+      video1.removeEventListener('ended', handleVideo1End)
+      video2.removeEventListener('ended', handleVideo2End)
+    }
+  }, [showingFirst, currentIndex, videoCount, fadeDuration, getVideoPath])
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div className="absolute inset-0 overflow-hidden bg-black">
       {/* Video 1 */}
       <motion.video
-        ref={videoRef1}
-        autoPlay
+        ref={video1Ref}
         muted
         playsInline
+        preload="auto"
         className="absolute top-0 left-0 w-full h-full object-cover"
-        src={videoFiles[currentVideoIndex]}
-        initial={{ opacity: 1 }}
         animate={{
-          opacity: activeVideoRef === 1 && !isTransitioning ? 1 : 0,
-          scale: activeVideoRef === 1 && !isTransitioning ? 1 : 1.05
+          opacity: showingFirst ? 1 : 0,
         }}
-        transition={{ duration: fadeDuration / 1000, ease: "easeInOut" }}
+        transition={{
+          duration: fadeDuration / 1000,
+          ease: "easeInOut"
+        }}
+        style={{ pointerEvents: 'none' }}
       />
 
       {/* Video 2 */}
       <motion.video
-        ref={videoRef2}
-        autoPlay
+        ref={video2Ref}
         muted
         playsInline
+        preload="auto"
         className="absolute top-0 left-0 w-full h-full object-cover"
-        src={videoFiles[(currentVideoIndex + 1) % videoCount]}
-        initial={{ opacity: 0 }}
         animate={{
-          opacity: activeVideoRef === 2 && !isTransitioning ? 1 : 0,
-          scale: activeVideoRef === 2 && !isTransitioning ? 1 : 1.05
+          opacity: showingFirst ? 0 : 1,
         }}
-        transition={{ duration: fadeDuration / 1000, ease: "easeInOut" }}
+        transition={{
+          duration: fadeDuration / 1000,
+          ease: "easeInOut"
+        }}
+        style={{ pointerEvents: 'none' }}
       />
 
       {/* Dark overlay */}
