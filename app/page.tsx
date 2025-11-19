@@ -62,12 +62,14 @@ export default function Home() {
 
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8])
+  const y = useTransform(scrollYProgress, [0, 1], [0, -100])
+  const blur = useTransform(scrollYProgress, [0, 0.5], [0, 10])
 
   const [hero, setHero] = useState<HeroData>({
     title: 'MÜREKKEP HUKUK',
     subtitle: 'Adaletin Kalemi',
     description: 'Hukuki haklarınız için güvenilir, profesyonel ve etkili çözümler sunuyoruz',
-    buttonText: 'Ücretsiz Danışmanlık',
+    buttonText: 'Online Randevu & Danışma',
     buttonLink: '#contact'
   })
 
@@ -296,14 +298,35 @@ export default function Home() {
 
       {/* About Section */}
       {about && (
-        <section id="about" className="py-24 px-4 bg-gradient-to-b from-navy-800 to-navy-900">
-          <div className="max-w-7xl mx-auto">
+        <section id="about" className="py-24 px-4 bg-gradient-to-b from-navy-800 to-navy-900 relative overflow-hidden">
+          {/* Animated background */}
+          <motion.div
+            className="absolute -top-40 -left-40 w-80 h-80 bg-gold-500/10 rounded-full blur-3xl"
+            animate={{
+              x: [0, 100, 0],
+              y: [0, 50, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute -bottom-40 -right-40 w-96 h-96 bg-navy-600/20 rounded-full blur-3xl"
+            animate={{
+              x: [0, -80, 0],
+              y: [0, -60, 0],
+              scale: [1, 1.3, 1],
+            }}
+            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          />
+
+          <div className="max-w-7xl mx-auto relative z-10">
             <motion.div
-              initial={{ opacity: 0, y: 50, scale: 0.9 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              initial={{ opacity: 0, y: 100, scale: 0.8, rotateX: -45 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="text-center mb-16"
+              style={{ transformStyle: "preserve-3d", perspective: "1000px" }}
             >
               <h2 className="text-5xl font-bold text-white mb-4">{about.title}</h2>
               <div className="w-24 h-1 bg-gradient-to-r from-gold-600 to-gold-400 mx-auto mb-8"></div>
@@ -386,13 +409,40 @@ export default function Home() {
 
       {/* Team Section */}
       {team.length > 0 && (
-        <section id="team" className="py-24 px-4 bg-gradient-to-b from-navy-800 to-navy-900">
-          <div className="max-w-7xl mx-auto">
+        <section id="team" className="py-24 px-4 bg-gradient-to-b from-navy-800 to-navy-900 relative overflow-hidden">
+          {/* Floating particles */}
+          {[...Array(5)].map((_, i) => (
             <motion.div
-              initial={{ opacity: 0, y: 50, scale: 0.9 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              key={i}
+              className="absolute w-2 h-2 bg-gold-400/30 rounded-full"
+              style={{
+                left: `${20 + i * 20}%`,
+                top: `${10 + i * 15}%`,
+              }}
+              animate={{
+                y: [0, -30, 0],
+                opacity: [0.3, 0.8, 0.3],
+              }}
+              transition={{
+                duration: 3 + i,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: i * 0.5,
+              }}
+            />
+          ))}
+
+          <div className="max-w-7xl mx-auto relative z-10">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5, rotateZ: -10 }}
+              whileInView={{ opacity: 1, scale: 1, rotateZ: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{
+                duration: 1,
+                type: "spring",
+                stiffness: 100,
+                damping: 20,
+              }}
               className="text-center mb-16"
             >
               <h2 className="text-5xl font-bold text-white mb-4">Ekibimiz</h2>
@@ -495,13 +545,27 @@ export default function Home() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-24 px-4 bg-gradient-to-b from-navy-800 to-navy-900">
-        <div className="max-w-7xl mx-auto">
+      <section id="contact" className="py-24 px-4 bg-gradient-to-b from-navy-800 to-navy-900 relative overflow-hidden">
+        {/* Gradient orbs */}
+        <motion.div
+          className="absolute top-1/4 left-1/4 w-72 h-72 bg-gradient-to-br from-gold-500/20 to-transparent rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            rotate: [0, 90, 0],
+          }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            initial={{ opacity: 0, y: 80, scale: 0.9 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{
+              duration: 0.9,
+              type: "spring",
+              stiffness: 80,
+            }}
             className="text-center mb-16"
           >
             <h2 className="text-5xl font-bold text-white mb-4">İletişim</h2>
