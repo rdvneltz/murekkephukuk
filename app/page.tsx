@@ -719,6 +719,12 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Appointment Modal */}
+      <AppointmentModal
+        isOpen={isAppointmentModalOpen}
+        onClose={() => setIsAppointmentModalOpen(false)}
+      />
     </div>
   )
 }

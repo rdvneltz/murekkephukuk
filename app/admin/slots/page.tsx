@@ -40,6 +40,7 @@ export default function AdminSlots() {
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   })
+  const [slotDuration, setSlotDuration] = useState(60) // minutes
 
   const daysOfWeekNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi']
   const workDays = [1, 2, 3, 4, 5] // Monday to Friday
@@ -104,8 +105,8 @@ export default function AdminSlots() {
       const end = new Date(endDate)
       const slotsToCreate: any[] = []
 
-      // Generate time slots (1-hour intervals)
-      const timeSlots = generateTimeSlots(startTime, endTime, 60)
+      // Generate time slots with selected duration
+      const timeSlots = generateTimeSlots(startTime, endTime, slotDuration)
 
       // Iterate through each day in the range
       let currentDate = new Date(start)
@@ -410,6 +411,23 @@ export default function AdminSlots() {
                     </div>
                   </div>
 
+                  {/* Slot Duration */}
+                  <div>
+                    <label className="block text-white mb-2">Slot Süresi</label>
+                    <select
+                      value={slotDuration}
+                      onChange={(e) => setSlotDuration(parseInt(e.target.value))}
+                      className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white"
+                    >
+                      <option value={15}>15 Dakika</option>
+                      <option value={30}>30 Dakika</option>
+                      <option value={45}>45 Dakika</option>
+                      <option value={60}>1 Saat</option>
+                      <option value={90}>1.5 Saat</option>
+                      <option value={120}>2 Saat</option>
+                    </select>
+                  </div>
+
                   {/* Time Range */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -457,9 +475,9 @@ export default function AdminSlots() {
                   {/* Info */}
                   <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
                     <p className="text-blue-400 text-sm">
-                      <strong>Bilgi:</strong> Seçilen günlerde, belirtilen saat aralığında 1 saatlik slotlar otomatik oluşturulacaktır.
+                      <strong>Bilgi:</strong> Seçilen günlerde, belirtilen saat aralığında {slotDuration} dakikalık slotlar otomatik oluşturulacaktır.
                       <br />
-                      Örnek: 09:00-18:00 arası 9 adet slot oluşturulur (09:00-10:00, 10:00-11:00, ...)
+                      Örnek: 09:00-18:00 arası ({slotDuration} dk slotlar) = {Math.floor((9 * 60) / slotDuration)} adet slot
                     </p>
                   </div>
 
