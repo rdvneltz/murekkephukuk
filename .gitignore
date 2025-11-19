@@ -40,3 +40,6 @@ next-env.d.ts
 /public/videos/*.mp4
 !/public/videos/optimized/*.mp4
 optimize-videos.sh
+
+# user uploads
+/public/uploads/

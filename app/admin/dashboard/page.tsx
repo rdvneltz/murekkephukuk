@@ -2,19 +2,55 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { LayoutDashboard, FileText, Users, Phone, Settings, Image, Star, BookOpen, Calendar, Clock, Video } from 'lucide-react'
 import Link from 'next/link'
+import axios from 'axios'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [stats, setStats] = useState({
+    services: 0,
+    team: 0,
+    blog: 0,
+    pendingAppointments: 0,
+    testimonials: 0
+  })
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/admin/login')
     }
   }, [status, router])
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchStats()
+    }
+  }, [status])
+
+  const fetchStats = async () => {
+    try {
+      const [servicesRes, teamRes, blogRes, appointmentsRes, testimonialsRes] = await Promise.all([
+        axios.get('/api/services'),
+        axios.get('/api/team'),
+        axios.get('/api/blog?admin=true'),
+        axios.get('/api/appointments'),
+        axios.get('/api/testimonials')
+      ])
+
+      setStats({
+        services: servicesRes.data.length,
+        team: teamRes.data.length,
+        blog: blogRes.data.length,
+        pendingAppointments: appointmentsRes.data.filter((a: any) => a.status === 'pending').length,
+        testimonials: testimonialsRes.data.length
+      })
+    } catch (error) {
+      console.error('İstatistikler yüklenemedi', error)
+    }
+  }
 
   if (status === 'loading') {
     return (
@@ -40,8 +76,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900">
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
-
       <div className="relative z-10 p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-12">
@@ -64,18 +98,26 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             <div className="glass rounded-xl p-6">
-              <div className="text-gold-500 text-4xl font-bold mb-2">12</div>
+              <div className="text-gold-500 text-4xl font-bold mb-2">{stats.services}</div>
               <div className="text-white/70">Toplam Hizmet</div>
             </div>
             <div className="glass rounded-xl p-6">
-              <div className="text-gold-500 text-4xl font-bold mb-2">5</div>
+              <div className="text-gold-500 text-4xl font-bold mb-2">{stats.team}</div>
               <div className="text-white/70">Ekip Üyesi</div>
             </div>
             <div className="glass rounded-xl p-6">
-              <div className="text-gold-500 text-4xl font-bold mb-2">24</div>
+              <div className="text-gold-500 text-4xl font-bold mb-2">{stats.blog}</div>
               <div className="text-white/70">Blog Yazısı</div>
+            </div>
+            <div className="glass rounded-xl p-6">
+              <div className="text-orange-500 text-4xl font-bold mb-2">{stats.pendingAppointments}</div>
+              <div className="text-white/70">Bekleyen Randevu</div>
+            </div>
+            <div className="glass rounded-xl p-6">
+              <div className="text-pink-500 text-4xl font-bold mb-2">{stats.testimonials}</div>
+              <div className="text-white/70">Müvekkil Yorumu</div>
             </div>
           </div>
         </div>

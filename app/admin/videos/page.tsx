@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ChevronUp, ChevronDown, Trash2, Plus, Video as VideoIcon } from 'lucide-react'
+import { ChevronUp, ChevronDown, Trash2, Plus, Video as VideoIcon, ArrowLeft } from 'lucide-react'
 import axios from 'axios'
+import Link from 'next/link'
 
 interface HeroVideo {
   id: string
@@ -113,7 +114,12 @@ export default function AdminVideos() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">Hero Video Yönetimi</h1>
+          <div className="flex items-center gap-4 mb-4">
+            <Link href="/admin/dashboard" className="text-gold-500 hover:text-gold-400">
+              <ArrowLeft className="w-6 h-6" />
+            </Link>
+            <h1 className="text-4xl font-bold text-white">Hero Video Yönetimi</h1>
+          </div>
           <p className="text-white/60">
             Video dosya adlarını girin (örn: 1.mp4, 2.mp4). Dosyalar /public/videos/ klasöründe olmalıdır.
           </p>

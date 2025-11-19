@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Calendar, Clock, Phone, Mail, Video, Check, X, Eye, Trash2 } from 'lucide-react'
+import { Calendar, Clock, Phone, Mail, Video, Check, X, Eye, Trash2, ArrowLeft } from 'lucide-react'
 import axios from 'axios'
+import Link from 'next/link'
 
 interface Appointment {
   id: string
@@ -106,7 +107,12 @@ export default function AdminAppointments() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold text-white">Randevu Yönetimi</h1>
+          <div className="flex items-center gap-4">
+            <Link href="/admin/dashboard" className="text-gold-500 hover:text-gold-400">
+              <ArrowLeft className="w-6 h-6" />
+            </Link>
+            <h1 className="text-4xl font-bold text-white">Randevu Yönetimi</h1>
+          </div>
           <div className="flex gap-2">
             {['all', 'pending', 'approved', 'cancelled', 'completed'].map(status => (
               <button
