@@ -74,12 +74,17 @@ export default function AdminSettings() {
     try {
       const { data } = await axios.get('/api/settings')
       if (data) {
+        // Ensure socialMedia is an array
+        const socialMedia = Array.isArray(data.socialMedia)
+          ? data.socialMedia
+          : [
+              { platform: 'instagram', url: '', active: false },
+              { platform: 'youtube', url: '', active: false }
+            ]
+
         setSettings({
           ...data,
-          socialMedia: data.socialMedia || [
-            { platform: 'instagram', url: '', active: false },
-            { platform: 'youtube', url: '', active: false }
-          ],
+          socialMedia,
           sectionVisibility: data.sectionVisibility || {
             hero: true,
             services: true,

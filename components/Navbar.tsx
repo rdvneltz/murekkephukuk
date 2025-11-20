@@ -59,7 +59,11 @@ export default function Navbar() {
           setSectionVisibility(res.data.sectionVisibility)
         }
         if (res.data && res.data.socialMedia) {
-          setSocialMediaLinks(res.data.socialMedia)
+          // Ensure socialMedia is an array
+          const socialMedia = Array.isArray(res.data.socialMedia)
+            ? res.data.socialMedia
+            : []
+          setSocialMediaLinks(socialMedia)
         }
       } catch (error) {
         console.error('Failed to fetch navbar settings:', error)
