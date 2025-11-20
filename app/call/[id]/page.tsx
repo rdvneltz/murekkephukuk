@@ -25,9 +25,9 @@ export default function VideoCallPage() {
   }, [])
 
   useEffect(() => {
-    // Load Jitsi Meet script
+    // Load Jitsi Meet script from public free server
     const script = document.createElement('script')
-    script.src = 'https://8x8.vc/vpaas-magic-cookie-c43c0d9e12a9410ba49895b6b41e9695/external_api.js'
+    script.src = 'https://meet.jit.si/external_api.js'
     script.async = true
     script.onload = () => {
       setJitsiLoaded(true)
@@ -35,7 +35,9 @@ export default function VideoCallPage() {
     document.body.appendChild(script)
 
     return () => {
-      document.body.removeChild(script)
+      if (document.body.contains(script)) {
+        document.body.removeChild(script)
+      }
     }
   }, [])
 
@@ -79,9 +81,9 @@ export default function VideoCallPage() {
   }
 
   const initJitsi = () => {
-    const domain = '8x8.vc'
+    const domain = 'meet.jit.si'
     const options = {
-      roomName: `vpaas-magic-cookie-c43c0d9e12a9410ba49895b6b41e9695/MurekkepHukuk_${appointmentId}`,
+      roomName: `MurekkepHukuk_${appointmentId}`,
       width: '100%',
       height: '100%',
       parentNode: document.querySelector('#jitsi-container'),
@@ -90,41 +92,20 @@ export default function VideoCallPage() {
         startWithVideoMuted: false,
         disableDeepLinking: true,
         prejoinPageEnabled: true,
-        toolbarButtons: [
-          'camera',
-          'chat',
-          'closedcaptions',
-          'desktop',
-          'download',
-          'embedmeeting',
-          'fullscreen',
-          'hangup',
-          'help',
-          'microphone',
-          'participants-pane',
-          'profile',
-          'raisehand',
-          'recording',
-          'security',
-          'settings',
-          'shareaudio',
-          'sharedvideo',
-          'shortcuts',
-          'tileview',
-          'toggle-camera',
-          'videoquality',
-        ],
+        enableWelcomePage: false,
+        enableClosePage: false,
       },
       interfaceConfigOverwrite: {
-        SHOW_JITSI_WATERMARK: false,
-        SHOW_WATERMARK_FOR_GUESTS: false,
+        SHOW_JITSI_WATERMARK: true,
+        SHOW_WATERMARK_FOR_GUESTS: true,
         TOOLBAR_ALWAYS_VISIBLE: false,
-        DEFAULT_REMOTE_DISPLAY_NAME: 'Misafir',
-        DEFAULT_LOCAL_DISPLAY_NAME: appointment?.name || 'Siz',
+        DEFAULT_REMOTE_DISPLAY_NAME: 'Avukat',
+        DEFAULT_LOCAL_DISPLAY_NAME: appointment?.name || 'Danışan',
         MOBILE_APP_PROMO: false,
+        SHOW_CHROME_EXTENSION_BANNER: false,
       },
       userInfo: {
-        displayName: appointment?.name || 'Misafir',
+        displayName: appointment?.name || 'Danışan',
       },
     }
 
