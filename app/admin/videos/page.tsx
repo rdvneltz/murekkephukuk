@@ -19,6 +19,11 @@ export default function AdminVideos() {
   const [newVideoName, setNewVideoName] = useState('')
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; videoId: string | null; videoName: string }>({
+    show: false,
+    videoId: null,
+    videoName: ''
+  })
 
   useEffect(() => {
     fetchVideos()
@@ -175,20 +180,37 @@ export default function AdminVideos() {
     }
   }
 
-  const deleteVideo = async (id: string) => {
-    if (!confirm('Bu videoyu listeden çıkarmak istediğinizden emin misiniz?')) return
+  const handleDeleteClick = (video: HeroVideo) => {
+    console.log('Delete button clicked for video:', video.id, video.fileName)
+    setDeleteConfirm({
+      show: true,
+      videoId: video.id,
+      videoName: video.fileName
+    })
+  }
+
+  const confirmDelete = async () => {
+    const { videoId } = deleteConfirm
+    if (!videoId) return
 
     try {
-      console.log('Deleting video with id:', id)
-      const response = await axios.delete(`/api/hero-videos?id=${id}`)
+      console.log('Deleting video with id:', videoId)
+      const response = await axios.delete(`/api/hero-videos?id=${videoId}`)
       console.log('Delete response:', response.data)
       alert('Video başarıyla silindi')
+      setDeleteConfirm({ show: false, videoId: null, videoName: '' })
       fetchVideos()
     } catch (error: any) {
       console.error('Delete error:', error)
       const errorMessage = error.response?.data?.details || error.response?.data?.error || error.message || 'Bilinmeyen hata'
       alert('Silme işlemi başarısız oldu: ' + errorMessage)
+      setDeleteConfirm({ show: false, videoId: null, videoName: '' })
     }
+  }
+
+  const cancelDelete = () => {
+    console.log('Delete cancelled')
+    setDeleteConfirm({ show: false, videoId: null, videoName: '' })
   }
 
   if (loading) {
@@ -346,7 +368,7 @@ export default function AdminVideos() {
 
                   {/* Delete */}
                   <button
-                    onClick={() => deleteVideo(video.id)}
+                    onClick={() => handleDeleteClick(video)}
                     className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 transition-all"
                     title="Sil"
                   >
@@ -373,6 +395,42 @@ export default function AdminVideos() {
           </ul>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm.show && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-navy-800 rounded-xl p-8 max-w-md w-full mx-4 border border-red-500/30"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                <Trash2 className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-white">Video Sil</h3>
+            </div>
+
+            <p className="text-white/80 mb-2">Bu videoyu listeden çıkarmak istediğinizden emin misiniz?</p>
+            <p className="text-gold-400 font-semibold mb-6">{deleteConfirm.videoName}</p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={cancelDelete}
+                className="flex-1 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-semibold transition-all"
+              >
+                İptal
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-all"
+              >
+                Evet, Sil
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }
