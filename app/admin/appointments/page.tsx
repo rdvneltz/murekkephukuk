@@ -17,6 +17,9 @@ interface Appointment {
   time: string
   meetingPlatform: string
   meetingLink?: string
+  consultationType: string
+  preferredLawyer?: string
+  description: string
   status: string
   notes?: string
   notificationSent: boolean
