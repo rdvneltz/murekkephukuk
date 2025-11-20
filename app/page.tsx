@@ -8,6 +8,7 @@ import axios from 'axios'
 import Navbar from '@/components/Navbar'
 import VideoCarousel from '@/components/VideoCarousel'
 import AppointmentModal from '@/components/AppointmentModal'
+import Footer from '@/components/Footer'
 
 interface HeroData {
   title: string
@@ -817,32 +818,7 @@ export default function Home() {
       )}
 
       {/* Footer */}
-      <footer className="bg-navy-900 border-t border-white/10 py-12 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <Image
-            src="/assets/murekkep-logo-saydam.png"
-            alt="Mürekkep Hukuk"
-            width={100}
-            height={100}
-            className="mx-auto mb-6"
-          />
-          <p className="text-white/60 mb-4">
-            © 2024 Mürekkep Hukuk Bürosu. Tüm hakları saklıdır.
-          </p>
-          <div className="flex justify-center items-center gap-6 text-white/60">
-            <a href="#" className="hover:text-gold-500 transition">Gizlilik Politikası</a>
-            <span>|</span>
-            <a href="#" className="hover:text-gold-500 transition">Kullanım Koşulları</a>
-            <a
-              href="/admin/login"
-              className="ml-4 text-white/40 hover:text-gold-500 transition-colors"
-              title="Admin Paneli"
-            >
-              <Settings className="w-4 h-4" />
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Appointment Modal */}
       <AppointmentModal

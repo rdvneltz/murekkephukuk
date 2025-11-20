@@ -124,6 +124,8 @@ model SiteSettings {
   footerText  String?
   socialMedia Json?
   sectionVisibility Json? // {hero: true, services: true, about: true, team: true, contact: true}
+  copyrightText String? // Customizable copyright text
+  legalLinks  Json?   // [{title: string, content: string, active: boolean, order: number}]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
