@@ -51,11 +51,36 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, status, notes } = body
+    const { id, status, notes, meetingLink, date, time, previousDate, previousTime } = body
+
+    // Get current appointment to check platform
+    const currentAppointment = await prisma.appointment.findUnique({
+      where: { id }
+    })
+
+    if (!currentAppointment) {
+      return NextResponse.json({ error: 'Appointment not found' }, { status: 404 })
+    }
+
+    // Prepare update data
+    const updateData: any = {}
+    if (status !== undefined) updateData.status = status
+    if (notes !== undefined) updateData.notes = notes
+    if (meetingLink !== undefined) updateData.meetingLink = meetingLink
+    if (date !== undefined) updateData.date = new Date(date)
+    if (time !== undefined) updateData.time = time
+    if (previousDate !== undefined) updateData.previousDate = previousDate ? new Date(previousDate) : null
+    if (previousTime !== undefined) updateData.previousTime = previousTime
+
+    // Auto-generate meeting link for "site" platform when approved
+    if (status === 'approved' && currentAppointment.meetingPlatform === 'site' && !meetingLink) {
+      const baseUrl = process.env.NEXTAUTH_URL || 'https://murekkephukuk.vercel.app'
+      updateData.meetingLink = `${baseUrl}/call/${id}`
+    }
 
     const appointment = await prisma.appointment.update({
       where: { id },
-      data: { status, notes }
+      data: updateData
     })
 
     return NextResponse.json(appointment)
