@@ -46,19 +46,14 @@ export default function Footer() {
   const fetchFooterSettings = async () => {
     try {
       const { data } = await axios.get('/api/settings')
-      console.log('Footer settings data:', data)
       if (data.copyrightText) {
         setCopyrightText(data.copyrightText)
       }
       if (data.legalLinks && Array.isArray(data.legalLinks)) {
-        console.log('Legal links from API:', data.legalLinks)
         const activeLinks = data.legalLinks
           .filter((link: LegalLink) => link.active)
           .sort((a: LegalLink, b: LegalLink) => a.order - b.order)
-        console.log('Active legal links:', activeLinks)
         setLegalLinks(activeLinks)
-      } else {
-        console.log('No legal links found or not an array')
       }
     } catch (error) {
       console.error('Failed to fetch footer settings:', error)
