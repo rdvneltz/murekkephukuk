@@ -33,14 +33,19 @@ export default function Footer() {
   const fetchFooterSettings = async () => {
     try {
       const { data } = await axios.get('/api/settings')
+      console.log('Footer settings data:', data)
       if (data.copyrightText) {
         setCopyrightText(data.copyrightText)
       }
       if (data.legalLinks && Array.isArray(data.legalLinks)) {
+        console.log('Legal links from API:', data.legalLinks)
         const activeLinks = data.legalLinks
           .filter((link: LegalLink) => link.active)
           .sort((a: LegalLink, b: LegalLink) => a.order - b.order)
+        console.log('Active legal links:', activeLinks)
         setLegalLinks(activeLinks)
+      } else {
+        console.log('No legal links found or not an array')
       }
     } catch (error) {
       console.error('Failed to fetch footer settings:', error)
@@ -72,39 +77,26 @@ export default function Footer() {
           <p className="text-white/60 mb-4">
             {copyrightText}
           </p>
-          <div className="flex justify-center items-center gap-6 text-white/60 flex-wrap">
+          <div className="flex justify-center items-center gap-4 text-white/60 flex-wrap">
             {legalLinks.map((link, index) => (
-              <div key={index} className="flex items-center gap-6">
+              <div key={index} className="flex items-center gap-4">
                 <button
                   onClick={() => openLegalModal(link)}
                   className="hover:text-gold-500 transition cursor-pointer"
                 >
                   {link.title}
                 </button>
-                {index < legalLinks.length - 1 && <span>|</span>}
+                {index < legalLinks.length - 1 && <span className="text-white/40">|</span>}
               </div>
             ))}
-            {legalLinks.length > 0 && (
-              <div className="flex items-center gap-6">
-                <span>|</span>
-                <a
-                  href="/admin/login"
-                  className="text-white/40 hover:text-gold-500 transition-colors"
-                  title="Admin Paneli"
-                >
-                  <Settings className="w-4 h-4" />
-                </a>
-              </div>
-            )}
-            {legalLinks.length === 0 && (
-              <a
-                href="/admin/login"
-                className="ml-4 text-white/40 hover:text-gold-500 transition-colors"
-                title="Admin Paneli"
-              >
-                <Settings className="w-4 h-4" />
-              </a>
-            )}
+            {legalLinks.length > 0 && <span className="text-white/40">|</span>}
+            <a
+              href="/admin/login"
+              className="text-white/40 hover:text-gold-500 transition-colors"
+              title="Admin Paneli"
+            >
+              <Settings className="w-4 h-4" />
+            </a>
           </div>
         </div>
       </footer>
