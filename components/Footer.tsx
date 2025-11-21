@@ -30,6 +30,19 @@ export default function Footer() {
     fetchFooterSettings()
   }, [])
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (selectedLegalContent) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [selectedLegalContent])
+
   const fetchFooterSettings = async () => {
     try {
       const { data } = await axios.get('/api/settings')

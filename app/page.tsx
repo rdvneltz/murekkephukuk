@@ -116,6 +116,32 @@ export default function Home() {
     contact: true
   })
 
+  // Prevent body scroll when blog modal is open
+  useEffect(() => {
+    if (selectedBlogPost) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [selectedBlogPost])
+
+  // Prevent body scroll when appointment modal is open
+  useEffect(() => {
+    if (isAppointmentModalOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isAppointmentModalOpen])
+
   useEffect(() => {
     const fetchAllData = async () => {
       try {
