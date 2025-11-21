@@ -6,6 +6,10 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+
+  /* Theme colors - can be overridden dynamically */
+  --color-primary: #c19a6b;
+  --color-secondary: #243b53;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -52,12 +56,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c19a6b;
+  background: var(--color-primary);
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a07c4d;
+  background: color-mix(in srgb, var(--color-primary) 80%, black);
 }
 
 /* Smooth transitions */
@@ -89,7 +93,13 @@ body {
 }
 
 .animated-gradient {
-  background: linear-gradient(-45deg, #243b53, #334e68, #c19a6b, #a07c4d);
+  background: linear-gradient(
+    -45deg,
+    var(--color-secondary),
+    color-mix(in srgb, var(--color-secondary) 80%, white),
+    var(--color-primary),
+    color-mix(in srgb, var(--color-primary) 80%, black)
+  );
   background-size: 400% 400%;
   animation: gradient-shift 15s ease infinite;
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import ThemeProvider from "@/components/ThemeProvider";
 
 const gotham = localFont({
   src: [
@@ -42,6 +43,7 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <body className={`${gotham.variable} font-gotham antialiased`}>
+        <ThemeProvider />
         <Providers>
           {children}
         </Providers>
