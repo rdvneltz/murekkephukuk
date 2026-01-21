@@ -145,66 +145,76 @@ export default function Home() {
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        // Tüm verileri paralel olarak çek
-        const [heroRes, servicesRes, teamRes, contactRes, aboutRes, videosRes, settingsRes, testimonialsRes, blogRes] = await Promise.all([
-          axios.get('/api/hero', { headers: { 'Cache-Control': 'no-cache' } }),
-          axios.get('/api/services', { headers: { 'Cache-Control': 'no-cache' } }),
-          axios.get('/api/team', { headers: { 'Cache-Control': 'no-cache' } }),
-          axios.get('/api/contact', { headers: { 'Cache-Control': 'no-cache' } }),
-          axios.get('/api/about', { headers: { 'Cache-Control': 'no-cache' } }),
-          axios.get('/api/hero-videos', { headers: { 'Cache-Control': 'no-cache' } }),
-          axios.get('/api/settings', { headers: { 'Cache-Control': 'no-cache' } }),
-          axios.get('/api/testimonials', { headers: { 'Cache-Control': 'no-cache' } }),
-          axios.get('/api/blog', { headers: { 'Cache-Control': 'no-cache' } })
+        // Tüm verileri paralel olarak çek - Promise.allSettled ile cascade failure önlenir
+        const results = await Promise.allSettled([
+          axios.get('/api/hero', { headers: { 'Cache-Control': 'no-cache' }, timeout: 10000 }),
+          axios.get('/api/services', { headers: { 'Cache-Control': 'no-cache' }, timeout: 10000 }),
+          axios.get('/api/team', { headers: { 'Cache-Control': 'no-cache' }, timeout: 10000 }),
+          axios.get('/api/contact', { headers: { 'Cache-Control': 'no-cache' }, timeout: 10000 }),
+          axios.get('/api/about', { headers: { 'Cache-Control': 'no-cache' }, timeout: 10000 }),
+          axios.get('/api/hero-videos', { headers: { 'Cache-Control': 'no-cache' }, timeout: 10000 }),
+          axios.get('/api/settings', { headers: { 'Cache-Control': 'no-cache' }, timeout: 10000 }),
+          axios.get('/api/testimonials', { headers: { 'Cache-Control': 'no-cache' }, timeout: 10000 }),
+          axios.get('/api/blog', { headers: { 'Cache-Control': 'no-cache' }, timeout: 10000 })
         ])
 
+        const [heroRes, servicesRes, teamRes, contactRes, aboutRes, videosRes, settingsRes, testimonialsRes, blogRes] = results
+
         // Hero verilerini set et
-        if (heroRes.data) setHero(heroRes.data)
+        if (heroRes.status === 'fulfilled' && heroRes.value.data) {
+          setHero(heroRes.value.data)
+        }
 
         // Hizmetleri set et
-        if (servicesRes.data && servicesRes.data.length > 0) {
-          setServices(servicesRes.data)
+        if (servicesRes.status === 'fulfilled' && servicesRes.value.data?.length > 0) {
+          setServices(servicesRes.value.data)
         }
 
         // Ekip üyelerini set et
-        if (teamRes.data && teamRes.data.length > 0) {
-          setTeam(teamRes.data)
+        if (teamRes.status === 'fulfilled' && teamRes.value.data?.length > 0) {
+          setTeam(teamRes.value.data)
         }
 
         // İletişim bilgilerini set et
-        if (contactRes.data) setContact(contactRes.data)
+        if (contactRes.status === 'fulfilled' && contactRes.value.data) {
+          setContact(contactRes.value.data)
+        }
 
         // Hakkımızda bilgilerini set et
-        if (aboutRes.data) setAbout(aboutRes.data)
+        if (aboutRes.status === 'fulfilled' && aboutRes.value.data) {
+          setAbout(aboutRes.value.data)
+        }
 
         // Hero videoları set et
-        console.log('Video data from API:', videosRes.data)
-        if (videosRes.data && videosRes.data.length > 0) {
-          const activeVideos = videosRes.data
+        if (videosRes.status === 'fulfilled' && videosRes.value.data?.length > 0) {
+          const activeVideos = videosRes.value.data
             .filter((v: any) => v.active)
             .sort((a: any, b: any) => a.order - b.order)
             .map((v: any) => v.fileName)
-          console.log('Active videos:', activeVideos)
           setHeroVideos(activeVideos)
-        } else {
-          console.log('No videos found or empty array')
         }
 
         // Testimonials set et
-        if (testimonialsRes.data && testimonialsRes.data.length > 0) {
-          const activeTestimonials = testimonialsRes.data.filter((t: any) => t.active)
+        if (testimonialsRes.status === 'fulfilled' && testimonialsRes.value.data?.length > 0) {
+          const activeTestimonials = testimonialsRes.value.data.filter((t: any) => t.active)
           setTestimonials(activeTestimonials)
         }
 
         // Blog posts set et
-        if (blogRes.data && blogRes.data.length > 0) {
-          const publishedPosts = blogRes.data.filter((p: any) => p.published)
+        if (blogRes.status === 'fulfilled' && blogRes.value.data?.length > 0) {
+          const publishedPosts = blogRes.value.data.filter((p: any) => p.published)
           setBlogPosts(publishedPosts)
         }
 
         // Section visibility ayarlarını set et
-        if (settingsRes.data && settingsRes.data.sectionVisibility) {
-          setSectionVisibility(settingsRes.data.sectionVisibility)
+        if (settingsRes.status === 'fulfilled' && settingsRes.value.data?.sectionVisibility) {
+          setSectionVisibility(settingsRes.value.data.sectionVisibility)
+        }
+
+        // Hataları logla (ama cascade failure yok)
+        const failures = results.filter(r => r.status === 'rejected')
+        if (failures.length > 0) {
+          console.warn('Some API calls failed:', failures.map(f => (f as PromiseRejectedResult).reason?.message))
         }
       } catch (error) {
         console.error('Data fetch error:', error)
