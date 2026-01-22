@@ -6,9 +6,14 @@ export async function GET() {
     const settings = await prisma.siteSettings.findFirst({
       orderBy: { updatedAt: 'desc' }
     })
-    return NextResponse.json(settings)
-  } catch (error) {
-    return NextResponse.json({ error: 'Veri alınamadı' }, { status: 500 })
+    // Return empty object instead of null to prevent client-side errors
+    return NextResponse.json(settings || {})
+  } catch (error: any) {
+    console.error('Settings GET error:', error?.message || error)
+    return NextResponse.json(
+      { error: 'Veri alınamadı', details: error?.message },
+      { status: 500 }
+    )
   }
 }
 

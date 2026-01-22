@@ -7,9 +7,21 @@ export async function GET() {
       where: { active: true },
       orderBy: { updatedAt: 'desc' } // En son güncellenen aktif hero'yu getir
     })
-    return NextResponse.json(hero)
-  } catch (error) {
-    return NextResponse.json({ error: 'Veri alınamadı' }, { status: 500 })
+    // Return default hero data if none exists
+    return NextResponse.json(hero || {
+      title: 'Mürekkep Hukuk',
+      subtitle: 'Hukuki Danışmanlık',
+      description: 'Profesyonel hukuk hizmetleri',
+      buttonText: 'Randevu Al',
+      buttonLink: '#contact',
+      showButton: true
+    })
+  } catch (error: any) {
+    console.error('Hero GET error:', error?.message || error)
+    return NextResponse.json(
+      { error: 'Veri alınamadı', details: error?.message },
+      { status: 500 }
+    )
   }
 }
 

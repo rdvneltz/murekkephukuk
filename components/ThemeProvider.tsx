@@ -1,13 +1,27 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import axios from 'axios'
+
+// Retry utility function with exponential backoff
+const fetchWithRetry = async (url: string, maxRetries = 3, baseDelay = 1000) => {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await axios.get(url, { timeout: 5000 })
+      return response.data
+    } catch (error) {
+      if (attempt === maxRetries - 1) throw error
+      // Exponential backoff: 1s, 2s, 4s
+      await new Promise(resolve => setTimeout(resolve, baseDelay * Math.pow(2, attempt)))
+    }
+  }
+}
 
 export default function ThemeProvider() {
   useEffect(() => {
     const loadTheme = async () => {
       try {
-        const { data } = await axios.get('/api/settings')
+        const data = await fetchWithRetry('/api/settings')
         if (data) {
           // Set CSS variables for dynamic theming
           const root = document.documentElement
@@ -21,7 +35,11 @@ export default function ThemeProvider() {
           }
         }
       } catch (error) {
-        console.error('Failed to load theme:', error)
+        // Silently fail - use default theme colors from CSS
+        // This prevents the error from being logged multiple times
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Theme loading failed, using default colors')
+        }
       }
     }
 
